@@ -1,0 +1,17 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel BoidCalc
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+[numthreads(8,8,1)]
+void BoidCalc (uint3 id : SV_DispatchThreadID)
+
+    RWStructuredBuffer<Boid> boids;
+    // TODO: insert actual code here!
+    for(int index=0;index<numBoids;index++){
+        
+    
+    }
+}
