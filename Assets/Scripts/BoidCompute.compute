@@ -3,15 +3,30 @@
 
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
-RWTexture2D<float4> Result;
+struct Boid {
+    float3 position;
+    float3 direction;
+
+    float3 flockDir;
+    float3 flockCenter;
+    float3 separationDir;
+    int flockSize;
+};
+
+RWStructuredBuffer<Boid> boids;
+int numBoids;
+float viewRadius;
+float avoidRadius;
 
 [numthreads(8,8,1)]
 void BoidCalc (uint3 id : SV_DispatchThreadID)
 
-    RWStructuredBuffer<Boid> boids;
     // TODO: insert actual code here!
     for(int index=0;index<numBoids;index++){
-        
+        //for all other boids: if offset magnatude is less than viewRadius
+        //increment flockSize, and increase flockdirection and center.
+        //if magnatude is less than avoid, subtract heading by the offset, divided by distance so closer=stronger
+
     
     }
 }
