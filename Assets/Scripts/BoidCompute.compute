@@ -23,9 +23,29 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
 
     // TODO: insert actual code here!
     for(int index=0;index<numBoids;index++){
-        //for all other boids: if offset magnatude is less than viewRadius
-        //increment flockSize, and increase flockdirection and center.
-        //if magnatude is less than avoid, subtract heading by the offset, divided by distance so closer=stronger
+
+        if(index!=id.x){
+            //for all other boids: if offset magnatude is less than viewRadius
+            //increment flockSize, and increase flockdirection and center.
+            float3 offset = boids[index].position-boids[id.x].position;
+
+            //if we just use both sides already squared, we don't need to do any square rooting for distance, since we just need to compare them
+            float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z
+
+            if(offsetDistSqr <(viewRadius*viewRadius)){
+                boids[id.x].flockSize+=1;
+                boids[id.x].flockDir+=boids[index].direction;
+                boids[id.x].flockCenter+=boids[index].position;
+
+                //if magnatude is less than avoid, subtract heading by the offset, divided by distance so closer=stronger
+                if(offsetDistSqr<(avoidRadius*avoidRadius)){
+
+                    boids[id.x].separationDir -= offset/offsetDistSqr;
+                }
+            }
+            
+
+        }
 
     
     }

@@ -83,7 +83,7 @@ public class Boid : MonoBehaviour
         {
             Vector3 dir = transform.TransformDirection(rayDirections[i]);
             Ray ray = new Ray(position, dir);
-            if (!Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask){
+            if (!Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask)){
                 return dir;
             }
         }
