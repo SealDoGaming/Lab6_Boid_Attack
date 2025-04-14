@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3541bc3f03f52004890ad6c8b558a897, type: 3}
+  m_Name: BoidSettings
+  m_EditorClassIdentifier: 
+  minSpeed: 4
+  maxSpeed: 10
+  perceptionRadius: 3
+  avoidanceRadius: 1
+  maxTurnForce: 3
+  alignWeight: 1
+  cohesionWeight: 1
+  seperateWeight: 1
+  collisionWeight: 10
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 128
+  raycastRadius: 0.27
+  obstacleSightRadius: 5
+  maxLoneliness: 100
+  lonelinessGainRate: 1
+  lonelinessLossRate: 2
+  centerSizeCoefficient: 0.1
+  defaultColor: {r: 0, g: 0.9769745, b: 1, a: 1}
+  seperationColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  happyColor: {r: 0, g: 1, b: 0, a: 1}
+  sadColor: {r: 0, g: 0, b: 1, a: 1}

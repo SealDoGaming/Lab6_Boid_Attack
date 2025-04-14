@@ -6,11 +6,11 @@ public class BoidManager : MonoBehaviour
 
     public BoidSettings settings;
     public ComputeShader compute;
-    [SerializeField]
     private Boid[] boids;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        boids = (Boid[])FindObjectsByType(typeof(Boid),FindObjectsSortMode.None);
         foreach(Boid boido in boids)
         {
             boido.Initialize(settings);
@@ -50,6 +50,8 @@ public class BoidManager : MonoBehaviour
             boids[i].sumSeperationDir = boidData[i].avoidanceHeading;
             boids[i].sumFlockCenter = boidData[i].flockCentre;
             boids[i].flockSize = boidData[i].numFlockmates;
+
+            boids[i].UpdateBoid();
 }
 
         //release the buffer.

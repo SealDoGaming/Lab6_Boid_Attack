@@ -1,6 +1,8 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel BoidCalc
 
+
+static const int threadGroupSize = 1024;
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 struct Boid {
@@ -18,11 +20,12 @@ int numBoids;
 float viewRadius;
 float avoidRadius;
 
-[numthreads(8,8,1)]
+[numthreads(threadGroupSize,1,1)]
 void BoidCalc (uint3 id : SV_DispatchThreadID)
+{
 
     // TODO: insert actual code here!
-    for(int index=0;index<numBoids;index++){
+    for (int index=0;index<numBoids;index++){
 
         if(index!=id.x){
             //for all other boids: if offset magnatude is less than viewRadius
@@ -30,7 +33,7 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
             float3 offset = boids[index].position-boids[id.x].position;
 
             //if we just use both sides already squared, we don't need to do any square rooting for distance, since we just need to compare them
-            float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z
+            float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z;
 
             if(offsetDistSqr <(viewRadius*viewRadius)){
                 boids[id.x].flockSize+=1;
@@ -47,6 +50,5 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
 
         }
 
-    
     }
 }
