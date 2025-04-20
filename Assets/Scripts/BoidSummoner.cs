@@ -7,12 +7,19 @@ public class BoidSummoner : MonoBehaviour
     [SerializeField] 
     int numBoids = 10;
     [SerializeField]
+    [Tooltip("Only for sphere SummoningType")]
     float radius=1;
+    [SerializeField]
+    [Tooltip("Only for cube SummoningType")]
+    Vector3 scale = Vector3.one;
 
+    public enum SummoningType { Sphere, Cube}
     public enum GizmoShowType { Never, SelectedOnly, Always }
     public enum GizmoDrawType { Wire, Solid}
 
 
+    [SerializeField]
+    private SummoningType summoningType = SummoningType.Sphere;
     [SerializeField]
     private GizmoShowType showRegion;
     [SerializeField]
@@ -26,6 +33,7 @@ public class BoidSummoner : MonoBehaviour
     private void Awake()
     {
         for (int i = 0; i < numBoids; i++) {
+
             Vector3 position = transform.position +Random.insideUnitSphere*radius;
             Vector3 dir = Random.insideUnitSphere;
             Boid boid = Instantiate(boidPrefab);
@@ -52,8 +60,13 @@ public class BoidSummoner : MonoBehaviour
     void DrawGizmos()
     {
         Gizmos.color = new Color(gizmoColor.r, gizmoColor.g, gizmoColor.b, gizmoOpacity);
-        //Gizmos.DrawSphere(transform.position, radius);
-        //Gizmos.DrawSphere(transform.position, radius);
-        Gizmos.DrawWireSphere(transform.position, radius);
+        if (summoningType == SummoningType.Sphere)
+        {
+
+            Gizmos.DrawWireSphere(transform.position, radius);
+        }else if(summoningType == SummoningType.Cube)
+        {
+            Gizmos.DrawWireCube(transform.position, scale);
+        }
     }
 }

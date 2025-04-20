@@ -3,6 +3,7 @@ using UnityEngine;
 public class PlayerFlight : PlayerMovement
 {
     // Update is called once per frame
+    [Header("Movement")]
     [SerializeField]
     private float speed = 10f;
     void FixedUpdate()
@@ -15,4 +16,5 @@ public class PlayerFlight : PlayerMovement
         Vector3 offset = new Vector3(sideMovement, 0, forwardMovement);
         transform.position += this.transform.rotation*offset * Time.fixedDeltaTime;
     }
+
 }

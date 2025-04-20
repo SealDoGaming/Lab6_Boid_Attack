@@ -9,7 +9,7 @@ public class PlayerCam : MonoBehaviour
     [SerializeField]
     private float sensY = 1f;
 
-    private Transform orientation;
+    public Transform Orientation { get; private set; }
 
     private float xRotation;
     private float yRotation;
@@ -25,7 +25,7 @@ public class PlayerCam : MonoBehaviour
     }
     public void Initialize(InputAction rotationAction, Transform playerBody)
     {
-        this.orientation = playerBody;
+        this.Orientation = playerBody;
         this.rotAction = rotationAction;
         rotAction.Enable();
     }
@@ -33,13 +33,13 @@ public class PlayerCam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = orientation.position;
+        transform.position = Orientation.position;
         //float mouseX = Inpu
         Vector2 mouseValues =rotAction.ReadValue<Vector2>();
         yRotation += mouseValues.x*sensY;
         xRotation -= mouseValues.y*sensX;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
         transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
-        orientation.rotation = Quaternion.Euler(0, yRotation, 0); 
+        Orientation.rotation = Quaternion.Euler(0, yRotation, 0); 
     }
 }

@@ -44,6 +44,24 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""60f2c314-df6e-4320-a924-af4edd0705e2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Swing Axe"",
+                    ""type"": ""Button"",
+                    ""id"": ""6d96474a-4630-46d0-9b44-7891c325965c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -112,6 +130,28 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""35042830-916e-4d02-981a-98fdd1ed9362"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""31462580-67e1-4fc1-942b-16289d8e8d7d"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Swing Axe"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -122,6 +162,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerInput1 = asset.FindActionMap("PlayerInput1", throwIfNotFound: true);
         m_PlayerInput1_Look = m_PlayerInput1.FindAction("Look", throwIfNotFound: true);
         m_PlayerInput1_Move = m_PlayerInput1.FindAction("Move", throwIfNotFound: true);
+        m_PlayerInput1_Jump = m_PlayerInput1.FindAction("Jump", throwIfNotFound: true);
+        m_PlayerInput1_SwingAxe = m_PlayerInput1.FindAction("Swing Axe", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -190,12 +232,16 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private List<IPlayerInput1Actions> m_PlayerInput1ActionsCallbackInterfaces = new List<IPlayerInput1Actions>();
     private readonly InputAction m_PlayerInput1_Look;
     private readonly InputAction m_PlayerInput1_Move;
+    private readonly InputAction m_PlayerInput1_Jump;
+    private readonly InputAction m_PlayerInput1_SwingAxe;
     public struct PlayerInput1Actions
     {
         private @PlayerControls m_Wrapper;
         public PlayerInput1Actions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Look => m_Wrapper.m_PlayerInput1_Look;
         public InputAction @Move => m_Wrapper.m_PlayerInput1_Move;
+        public InputAction @Jump => m_Wrapper.m_PlayerInput1_Jump;
+        public InputAction @SwingAxe => m_Wrapper.m_PlayerInput1_SwingAxe;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInput1; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -211,6 +257,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
+            @SwingAxe.started += instance.OnSwingAxe;
+            @SwingAxe.performed += instance.OnSwingAxe;
+            @SwingAxe.canceled += instance.OnSwingAxe;
         }
 
         private void UnregisterCallbacks(IPlayerInput1Actions instance)
@@ -221,6 +273,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
+            @SwingAxe.started -= instance.OnSwingAxe;
+            @SwingAxe.performed -= instance.OnSwingAxe;
+            @SwingAxe.canceled -= instance.OnSwingAxe;
         }
 
         public void RemoveCallbacks(IPlayerInput1Actions instance)
@@ -242,5 +300,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     {
         void OnLook(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
+        void OnSwingAxe(InputAction.CallbackContext context);
     }
 }
