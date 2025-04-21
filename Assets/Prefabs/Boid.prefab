@@ -96,7 +96,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3648969894107266582}
   - component: {fileID: 3827134999077439948}
-  - component: {fileID: 550104418544362096}
+  - component: {fileID: 2534541637583835808}
+  - component: {fileID: 898415177723836580}
   m_Layer: 6
   m_Name: Boid
   m_TagString: Untagged
@@ -138,7 +139,30 @@ MonoBehaviour:
   sumSeperationDir: {x: 0, y: 0, z: 0}
   sumFlockCenter: {x: 0, y: 0, z: 0}
   flockSize: 0
---- !u!54 &550104418544362096
+  isAlreadyDead: 0
+  corpseObject: {fileID: 7411155572734840681, guid: 3e5d57aba0d3c614086baa40cb6bdbfc, type: 3}
+--- !u!135 &2534541637583835808
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7411155572734840681}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 1024
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.27
+  m_Center: {x: 0, y: 0, z: -0.05}
+--- !u!54 &898415177723836580
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -157,11 +181,11 @@ Rigidbody:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0

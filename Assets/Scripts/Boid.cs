@@ -23,10 +23,14 @@ public class Boid : MonoBehaviour
     public Vector3 sumFlockCenter;
     [HideInInspector]
     public int flockSize;
+    [HideInInspector]
+    public bool isAlreadyDead = false;
 
     private int loneliness = 0;
     private int spookValue = 0;
-
+    [SerializeField]
+    private GameObject corpseObject;
+    private bool deadforreal=false;
 
     Material boidMaterial;
 
@@ -46,6 +50,19 @@ public class Boid : MonoBehaviour
     // Update is called once per frame
     public void UpdateBoid()
     {
+        if (isAlreadyDead&&!deadforreal)
+        {
+            GameObject corpse = GameObject.Instantiate(corpseObject);
+            corpse.transform.position = transform.position;
+            corpse.transform.rotation = transform.rotation;
+            position = new Vector3(99999, 9999, 9999);
+            transform.position = position;
+            deadforreal= true;
+        }
+        if (deadforreal)
+        {
+            return;
+        }
         Vector3 acceleration = Vector3.zero;
 
         if (flockSize != 0)

@@ -10,6 +10,8 @@ public abstract class PlayerMovement : MonoBehaviour
 
     protected InputAction moveAction;
     protected InputAction jumpAction;
+    protected InputAction attackAction;
+
     private void Awake()
     {
         inputScheme = new PlayerControls();
@@ -17,9 +19,10 @@ public abstract class PlayerMovement : MonoBehaviour
         InputAction lookAction = inputScheme.PlayerInput1.Look;
         this.moveAction = inputScheme.PlayerInput1.Move;
         this.jumpAction = inputScheme.PlayerInput1.Jump;
+        this.attackAction = inputScheme.PlayerInput1.SwingAxe;
 
 
-        playerCamera.Initialize(lookAction, this.transform);
+        playerCamera.Initialize(lookAction,attackAction, this.transform);
         moveAction.Enable();
         jumpAction.Enable();
 

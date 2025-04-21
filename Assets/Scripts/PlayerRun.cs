@@ -31,8 +31,6 @@ public class PlayerRun : PlayerMovement
     private bool grounded = false;
 
 
-
-
     private Rigidbody rb;
     private void Start()
     {
@@ -41,10 +39,10 @@ public class PlayerRun : PlayerMovement
     }
     void FixedUpdate()
     {
-        
+
         this.transform.rotation = playerCamera.Orientation.rotation;
-        rb.rotation = playerCamera.Orientation.rotation;
         Vector2 movementDir = moveAction.ReadValue<Vector2>();
+
 
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, groundLayers);
         if (grounded && !jumping)
@@ -71,7 +69,7 @@ public class PlayerRun : PlayerMovement
         //Vector3 newVelocity = this.transform.rotation * offset;
         //newVelocity.y = rb.linearVelocity.y;
         //transform.position += this.transform.rotation*offset * Time.fixedDeltaTime;
-        rb.AddForce(this.transform.rotation * offset*5f, ForceMode.Force);
+        rb.AddRelativeForce(offset*5f, ForceMode.Force);
         //rb.linearVelocity = newVelocity;
         //rb.MovePosition(transform.position + this.transform.rotation * offset * Time.fixedDeltaTime);
         Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
