@@ -15,7 +15,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &9102242812912072100
 Transform:
@@ -47,15 +47,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   position: {x: 0, y: 0, z: 0}
   centerAtHeightZero: 1
-  height: 8
-  xWidth: 15
-  zWidth: 15
+  height: 15
+  xWidth: 25
+  zWidth: 25
   wallParent: {fileID: 2405106190151053162}
   wallThickness: 1
-  wallPrefab: {fileID: 7523549866038003345, guid: ce99ed9748fb4f1469cbf98b5b5d325e, type: 3}
+  wallPrefab: {fileID: 7523549866038003345, guid: 2b049abb111eeee4dbbf574152e0aeed, type: 3}
   floorPrefab: {fileID: 3039339390949053332, guid: 776451ed14f2c934ba3ecab9a9aacd43, type: 3}
+  killBoxPrefab: {fileID: 3855756097105674329, guid: 080ca3e873e5baf4f97f5518ab633356, type: 3}
   outlineColor: {r: 1, g: 0, b: 0, a: 0.49411765}
-  showType: 3
+  showType: 2
+  drawEachWall: 0
 --- !u!1 &7053155771146062464
 GameObject:
   m_ObjectHideFlags: 0
@@ -70,7 +72,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2405106190151053162
 Transform:

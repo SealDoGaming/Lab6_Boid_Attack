@@ -33,6 +33,8 @@ public class LevelBox : MonoBehaviour
     private GameObject wallPrefab;
     [SerializeField]
     private GameObject floorPrefab;
+    [SerializeField]
+    private GameObject killBoxPrefab;
 
 
 
@@ -70,30 +72,43 @@ public class LevelBox : MonoBehaviour
     {
 
         Vector3 roofOffset = Vector3.up * (wallThickness+height)/2;
+        Vector3 roofOffset2 = Vector3.up * ((wallThickness + height) / 2 + wallThickness);
         Vector3 roofScale = new Vector3(xWidth, wallThickness, zWidth);
+        Vector3 roofScale2 = new Vector3(xWidth + 2 * wallThickness, wallThickness, zWidth+2*wallThickness);
         CreateWall(wallPrefab, roofOffset, roofScale, "Level Roof");
+        CreateWall(killBoxPrefab, roofOffset2, roofScale2, "KillRoof");
         for (int i = 0; i < 4; i++)
         {
             Vector3 wallOffset;
+            Vector3 wallOffset2;
             Vector3 wallScale;
+            Vector3 wallScale2;
             //even x is wide odd x is thin. Opposite for z
             int mult = ((i & 2) == 0) ? 1 : -1; 
             if (((i & 1) == 0))
             {
                 wallOffset = Vector3.forward * mult *( (zWidth + wallThickness) / 2);
+                wallOffset2 = Vector3.forward * mult * (((zWidth + wallThickness) / 2)+wallThickness);
                 wallScale = new Vector3(xWidth , height, wallThickness);
+                wallScale2 = new Vector3(xWidth + 2*wallThickness, height + 2 * wallThickness, wallThickness);
             }
             else
             {
 
                 wallOffset = Vector3.right * mult * ((xWidth + wallThickness) / 2);
+                wallOffset2 = Vector3.right * mult * (((xWidth + wallThickness) / 2) + wallThickness);
                 wallScale = new Vector3(wallThickness, height, zWidth);
+                wallScale2 = new Vector3(wallThickness, height + 2 * wallThickness, zWidth + 2 * wallThickness);
             }
             CreateWall(wallPrefab, wallOffset, wallScale, "Level Wall " + (i + 1));
+            CreateWall(killBoxPrefab,wallOffset2, wallScale2,"KillBox "+(i + 1));
         }
         Vector3 floorOffset = Vector3.down * (wallThickness + height) / 2;
+        Vector3 floorOffset2 = Vector3.down * ((wallThickness + height) / 2 + wallThickness);
         Vector3 floorScale = new Vector3(xWidth , wallThickness, zWidth);
+        Vector3 floorScale2 = new Vector3(xWidth + 2 * wallThickness, wallThickness, zWidth + 2 * wallThickness);
         CreateWall(floorPrefab, floorOffset, floorScale, "Level Floor");
+        CreateWall(killBoxPrefab, floorOffset2, floorScale2, "KillFloor");
 
     }
     private void CreateWall(GameObject usedPrefab, Vector3 offset, Vector3 scale, string name)

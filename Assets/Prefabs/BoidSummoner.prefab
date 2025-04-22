@@ -45,8 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: 3827134999077439948, guid: ab331a95dc7e99342a2443041e5ed4ce, type: 3}
-  numBoids: 2000
+  numBoids: 200
   radius: 20
+  scale: {x: 22, y: 13, z: 22}
+  summoningType: 1
   showRegion: 2
   drawingType: 0
   gizmoColor: {r: 0.06129539, g: 1, b: 0, a: 1}

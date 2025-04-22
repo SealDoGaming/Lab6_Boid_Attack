@@ -34,6 +34,20 @@ public class BoidSettings : ScriptableObject
 
     [Tooltip("Determines how quickly the boid becomes not-lonely after joining a flock")]
     public int lonelinessLossRate = 2;
+    
+    [Header("Boid Fear")]
+    [Tooltip("How Far away can the boids see the player initially")]
+    public float minPlayerSightRadius = 3f;
+    [Tooltip("How Far away can the boids see the player at max fear")]
+    public float maxPlayerSightRadius = 8f;
+    [Tooltip("Determines how many friends must die before a boids becomes comepletely afraid of the player")]
+    public float maxFear = 10;
+    [Tooltip("Determines how quickly fear will approach flock average fear level")]
+    public float fearDiffuseRate = 0.05f;
+    [Tooltip("Determines how strongly the boids initially avoid the player")]
+    public float minFearWeight = -0.1f;
+    [Tooltip("Determines how strongly the boids avoid the player at max fear")]
+    public float maxFearWeight = -1;
 
 
 
@@ -48,6 +62,8 @@ public class BoidSettings : ScriptableObject
     //public Color happyColor = Color.green;
     [Tooltip("Determines color the boid turns if it is without a flock for too long")]
     public Color sadColor = Color.blue;
+    [Tooltip("Determines color the boid become if it has seen the death of their comrads")]
+    public Color fearColor = Color.red;
 
 
 

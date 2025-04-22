@@ -1,6 +1,7 @@
 using Assets.Scripts;
 using System;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 using Random = UnityEngine.Random;
 
 public class Boid : MonoBehaviour
@@ -22,26 +23,32 @@ public class Boid : MonoBehaviour
     [HideInInspector]
     public Vector3 sumFlockCenter;
     [HideInInspector]
+    public float sumFlockFearLevel;
+    [HideInInspector]
+    public float fearLevel=0;
+    [HideInInspector]
+    public float fearLevelChange = 0;
+    [HideInInspector]
     public int flockSize;
     [HideInInspector]
     public bool isAlreadyDead = false;
 
     private int loneliness = 0;
     private int spookValue = 0;
-    [SerializeField]
-    private GameObject corpseObject;
-    private bool deadforreal=false;
 
     Material boidMaterial;
+
+    private Transform player;
 
     private void Awake()
     {
         boidMaterial = transform.GetComponentInChildren<MeshRenderer>().material;
 
     }
-    public void Initialize(BoidSettings settings)
+    public void Initialize(BoidSettings settings,Transform player)
     {
         this.settings = settings;
+        this.player = player;
         position = transform.position;
         forward = transform.forward;
 
@@ -50,23 +57,33 @@ public class Boid : MonoBehaviour
     // Update is called once per frame
     public void UpdateBoid()
     {
-        if (isAlreadyDead&&!deadforreal)
-        {
-            GameObject corpse = GameObject.Instantiate(corpseObject);
-            corpse.transform.position = transform.position;
-            corpse.transform.rotation = transform.rotation;
-            position = new Vector3(99999, 9999, 9999);
-            transform.position = position;
-            deadforreal= true;
-        }
-        if (deadforreal)
-        {
-            return;
-        }
         Vector3 acceleration = Vector3.zero;
+        fearLevel += fearLevelChange;
+        if (fearLevel > settings.maxFear)
+        {
+            fearLevel = settings.maxFear;
+        }
+        if (player != null)
+        {
+            Vector3 offsetToPlayer = (player.position - position);
+            float playerSight =Mathf.Lerp(settings.minPlayerSightRadius,settings.maxPlayerSightRadius, ((float)fearLevel) / settings.maxFear);
+            if (offsetToPlayer.magnitude < playerSight)
+            {
+                offsetToPlayer.Normalize();
+                float fearWeight = Mathf.Lerp(settings.minFearWeight, settings.maxFearWeight, ((float)fearLevel) / settings.maxFear);
+                if (CheckObstacle(-offsetToPlayer)){
 
+                    acceleration = CalculateForce(ObstacleRays(-offsetToPlayer)) * fearWeight;
+                }
+                else
+                {
+                    acceleration = CalculateForce(-offsetToPlayer) * fearWeight;
+                }
+            }
+        }
         if (flockSize != 0)
         {
+            fearLevel = Mathf.Lerp(fearLevel, (sumFlockFearLevel) / flockSize, settings.fearDiffuseRate);
             if (loneliness > 0)
             {
                 loneliness-=settings.lonelinessLossRate;
@@ -87,6 +104,7 @@ public class Boid : MonoBehaviour
             Vector3 cohesionForce = CalculateForce(flockOffset) * settings.cohesionWeight;
             acceleration += cohesionForce;
 
+
         }
         else
         {
@@ -98,6 +116,7 @@ public class Boid : MonoBehaviour
 
 
         }
+
         if (CheckObstacle())
         {
             acceleration += CalculateForce(ObstacleRays()) * settings.collisionWeight;
@@ -136,9 +155,13 @@ public class Boid : MonoBehaviour
     public void CalcEmotions()
     {
         Color currentColor = settings.defaultColor;
+
+
         currentColor = Color.Lerp(currentColor, settings.sadColor, (float)loneliness / (float)settings.maxLoneliness);
         //currentColor = Color.Lerp(settings.happyColor,currentColor, centerCloseness);
         currentColor = Color.Lerp(currentColor, settings.startledColor, (float)spookValue / 100f);
+        currentColor = Color.Lerp(currentColor, settings.fearColor, (float)fearLevel / settings.maxFear);
+
         SetColour(currentColor);
 
     }
@@ -154,10 +177,13 @@ public class Boid : MonoBehaviour
         Ray ray = new Ray(position, forward);
         return Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask);
     }
-    
+    private bool CheckObstacle(Vector3 dir)
+    {
+        Ray ray = new Ray(position, dir);
+        return Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask);
+    }
     private Vector3 ObstacleRays()
     {
-        // TODO: Actually get the proper RAYS
         Vector3[] rayDirections = BoidHelper.directions;
         
         for (int i=0; i < rayDirections.Length; i++)
@@ -166,6 +192,22 @@ public class Boid : MonoBehaviour
             Vector3 dir = transform.TransformDirection(rayDirections[i]);
             Ray ray = new Ray(position, dir);
             if (!Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask)){
+                return dir;
+            }
+        }
+        return forward;
+
+    }
+    private Vector3 ObstacleRays(Vector3 desiredDirection)
+    {
+        Vector3[] rayDirections = BoidHelper.directions;
+        Quaternion rotation = Quaternion.FromToRotation(transform.forward, desiredDirection);
+        for (int i = 0; i < rayDirections.Length; i++)
+        {
+            Vector3 dir = rotation * transform.TransformDirection(rayDirections[i]);
+            Ray ray = new Ray(position, dir);
+            if (!Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask))
+            {
                 return dir;
             }
         }

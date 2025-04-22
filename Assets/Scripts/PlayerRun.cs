@@ -32,10 +32,16 @@ public class PlayerRun : PlayerMovement
 
 
     private Rigidbody rb;
+    private ParticleSystem jetpackParticles;
+    private ParticleSystem.EmissionModule jetpackParticleEmission;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        jetpackParticles= GetComponentInChildren<ParticleSystem>();
+        jetpackParticleEmission = jetpackParticles.emission;
+        jetpackParticleEmission.enabled = false;
     }
     void FixedUpdate()
     {
@@ -91,6 +97,8 @@ public class PlayerRun : PlayerMovement
             {
                 Debug.Log(Physics.gravity);
                 rb.AddForce(jetpackAcceleration * Vector3.up, ForceMode.Acceleration);
+                jetpackParticleEmission.enabled = true;
+
             }
             jumping = true;
 
@@ -98,6 +106,7 @@ public class PlayerRun : PlayerMovement
         else
         {
             jumping = false;
+            jetpackParticleEmission.enabled = false;
         }
     }
 }

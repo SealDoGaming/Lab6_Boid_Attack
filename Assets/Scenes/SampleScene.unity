@@ -901,6 +901,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1366907874}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1493609865 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6266045763522453242, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
+  m_PrefabInstance: {fileID: 4520213928470284681}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1608439545 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4431665190170416875, guid: 08a3a8a583e50184fa8f8de5010408fa, type: 3}
@@ -920,6 +925,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2060834404607872689, guid: f44c7b00f7d16b04ebdcdcd4b8a6408e, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1493609865}
     - target: {fileID: 2772421790087412074, guid: f44c7b00f7d16b04ebdcdcd4b8a6408e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.6047363
@@ -977,18 +986,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 580722910469018780, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
-      propertyPath: m_Drag
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 580722910469018780, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
-      propertyPath: m_AngularDrag
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2715823566153868213, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
-      propertyPath: groundDrag
-      value: 0.3
-      objectReference: {fileID: 0}
     - target: {fileID: 2715823566153868213, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
       propertyPath: playerCamera
       value: 
@@ -999,7 +996,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6266045763522453242, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 3.76
       objectReference: {fileID: 0}
     - target: {fileID: 6266045763522453242, guid: e284313fcc8fc2c459a0ca9df922cc0d, type: 3}
       propertyPath: m_LocalPosition.z

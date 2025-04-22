@@ -21,6 +21,7 @@ public class LevelBoxEditor : Editor
 
     SerializedProperty wallPrefab;
     SerializedProperty floorPrefab;
+    SerializedProperty killBoxPrefab;
 
 
     SerializedProperty outlineColor;
@@ -45,6 +46,7 @@ public class LevelBoxEditor : Editor
         wallThickness = serializedObject.FindProperty("wallThickness");
         wallPrefab = serializedObject.FindProperty("wallPrefab");
         floorPrefab = serializedObject.FindProperty("floorPrefab");
+        killBoxPrefab = serializedObject.FindProperty("killBoxPrefab");
 
         outlineColor = serializedObject.FindProperty("outlineColor");
         showType = serializedObject.FindProperty("showType"); 
@@ -77,7 +79,8 @@ public class LevelBoxEditor : Editor
         EditorGUILayout.PropertyField(wallThickness, new GUIContent("Wall Thickness"));
 
         EditorGUILayout.PropertyField(wallPrefab, new GUIContent("Wall Prefab"));
-        EditorGUILayout.PropertyField(floorPrefab, new GUIContent("Wall Prefab"));
+        EditorGUILayout.PropertyField(floorPrefab, new GUIContent("Wall Prefab")); 
+        EditorGUILayout.PropertyField(killBoxPrefab, new GUIContent("Kill Box Prefab")); 
 
         EditorGUILayout.Space();
 

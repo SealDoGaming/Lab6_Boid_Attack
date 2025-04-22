@@ -30,6 +30,13 @@ MonoBehaviour:
   maxLoneliness: 100
   lonelinessGainRate: 1
   lonelinessLossRate: 2
+  minPlayerSightRadius: 3
+  maxPlayerSightRadius: 10
+  maxFear: 5
+  fearDiffuseRate: 0.05
+  minFearWeight: 0.5
+  maxFearWeight: 2
   defaultColor: {r: 0, g: 0.9769745, b: 1, a: 1}
   startledColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   sadColor: {r: 0, g: 0, b: 1, a: 1}
+  fearColor: {r: 1, g: 0, b: 0.16078432, a: 1}

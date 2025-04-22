@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class BoidSummoner : MonoBehaviour
 {
@@ -33,8 +34,18 @@ public class BoidSummoner : MonoBehaviour
     private void Awake()
     {
         for (int i = 0; i < numBoids; i++) {
-
-            Vector3 position = transform.position +Random.insideUnitSphere*radius;
+            Vector3 position = Vector3.zero;
+            if (summoningType == SummoningType.Sphere)
+            {
+                position = transform.position + Random.insideUnitSphere * radius;
+            }
+            else if (summoningType == SummoningType.Cube)
+            {
+                float x = Random.Range(-scale.x / 2, scale.x / 2);
+                float y = Random.Range(-scale.y / 2, scale.y / 2);
+                float z = Random.Range(-scale.z / 2, scale.z / 2);
+                position = transform.position + new Vector3(x, y, z);
+            }
             Vector3 dir = Random.insideUnitSphere;
             Boid boid = Instantiate(boidPrefab);
             boid.transform.position = position;

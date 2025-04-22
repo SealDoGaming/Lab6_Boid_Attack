@@ -44,7 +44,7 @@ public class AxeLogic : MonoBehaviour
     private void KillBoid(Boid doomedBoid)
     {
         //Debug.Log("Killed1");
-        if (isAttacking)
+        if (isAttacking&&!doomedBoid.isAlreadyDead)
         {
             //Debug.Log("Killed2");
             doomedBoid.isAlreadyDead = true;
