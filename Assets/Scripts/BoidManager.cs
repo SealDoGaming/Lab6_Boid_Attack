@@ -82,7 +82,7 @@ public class BoidManager : MonoBehaviour
             //boidMatrix[value].Add(boids[i]);
             boids[i].localGridIndex = value;
             Vector3 size = new Vector3(gridSizes.x, gridSizes.y, gridSizes.z);
-            Debug.Log(boidPos + " vs " + regionOffset+"and"+ size * (2 * settings.perceptionRadius) + " to "+(regionOffset+size * (2 * settings.perceptionRadius)));
+            //Debug.Log(boidPos + " vs " + regionOffset+"and"+ size * (2 * settings.perceptionRadius) + " to "+(regionOffset+size * (2 * settings.perceptionRadius)));
             //Debug.Log(gridSizes.x + ", " + gridSizes.y + ", " + gridSizes.z + " vs " + Mathf.FloorToInt(regionPos.x) + ", " + Mathf.FloorToInt(regionPos.y) + ", " + Mathf.FloorToInt(regionPos.z));
         }
     }
@@ -148,20 +148,6 @@ public class BoidManager : MonoBehaviour
     {
         //Create boidData array and set each boid position and dir
         //Boid[] boidArray = boidMatrix.SelectMany(i => i).ToArray();
-        for(int i = 0; i < boids.Count; i++)
-        {
-            if (boids[i].isAlreadyDead)
-            {
-                GameObject corpse = GameObject.Instantiate(corpseObject);
-                corpse.transform.position = boids[i].transform.position;
-                corpse.transform.rotation = boids[i].transform.rotation;
-                //RemoveFromLocalGrid(boidArray[i]);
-                boids.Remove(boids[i]);
-                Destroy(boids[i].gameObject);
-                deadBoidCount++;
-                i--;
-            }
-        }
         int numBoids = boids.Count;
         if (numBoids <= 0)
         {
@@ -206,7 +192,7 @@ public class BoidManager : MonoBehaviour
             boidData[index].fearLevel = boids[i].fearLevel;
             boidData[index].isDead = boids[i].isAlreadyDead?1:0;
             boidData[index].localGridIndex = boids[i].localGridIndex;
-            map[index] = i;
+            map[i] = index;
             matrixCountsClone[boids[i].localGridIndex]++;
             
         }
@@ -244,30 +230,28 @@ public class BoidManager : MonoBehaviour
 
         for(int i = 0; i < length; i++)
         {
-            boids[map[i]].sumFlockDir = boidData[i].flockHeading;
-            boids[map[i]].sumSeperationDir = boidData[i].avoidanceHeading;
-            boids[map[i]].sumFlockCenter = boidData[i].flockCentre;
-            boids[map[i]].flockSize = boidData[i].numFlockmates;
-            boids[map[i]].fearLevelChange =boidData[i].fearLevelChange;
-            boids[map[i]].sumFlockFearLevel = boidData[i].flockFearLevel;
-            if (boids[map[i]].isAlreadyDead)
+            boids[i].sumFlockDir = boidData[map[i]].flockHeading;
+            boids[i].sumSeperationDir = boidData[map[i]].avoidanceHeading;
+            boids[i].sumFlockCenter = boidData[map[i]].flockCentre;
+            boids[i].flockSize = boidData[map[i]].numFlockmates;
+            boids[i].fearLevelChange =boidData[map[i]].fearLevelChange;
+            boids[i].sumFlockFearLevel = boidData[map[i]].flockFearLevel;
+            if (boids[i].isAlreadyDead)
             {
-                continue;
                 GameObject corpse = GameObject.Instantiate(corpseObject);
-                corpse.transform.position = boids[map[i]].transform.position;
-                corpse.transform.rotation = boids[map[i]].transform.rotation;
-                //RemoveFromLocalGrid(boidArray[i]);
-                boids.Remove(boids[map[i]]);
-                Destroy(boids[map[i]].gameObject);
+                corpse.transform.position = boids[i].transform.position;
+                corpse.transform.rotation = boids[i].transform.rotation;
+                Destroy(boids[i].gameObject);
+                boids.RemoveAt(i);
                 deadBoidCount++;
                 i--;
                 length--;
             }
             else
             {
-                Debug.Log(i + " ->" + map[i]);
-                boids[map[i]].UpdateBoid();
-                UpdateLocalGrid(boids[map[i]]);
+                //Debug.Log(i + " ->" + map[i]);
+                boids[i].UpdateBoid();
+                UpdateLocalGrid(boids[i]);
 
             }
 }
