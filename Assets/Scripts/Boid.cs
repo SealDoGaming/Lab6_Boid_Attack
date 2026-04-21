@@ -32,6 +32,11 @@ public class Boid : MonoBehaviour
     public int flockSize;
     [HideInInspector]
     public bool isAlreadyDead = false;
+    [HideInInspector]
+    public Vector3Int localGridPos;
+    [HideInInspector]
+    public int localGridIndex;
+
 
     private int loneliness = 0;
     private int spookValue = 0;
@@ -39,6 +44,7 @@ public class Boid : MonoBehaviour
     Material boidMaterial;
 
     private Transform player;
+    private Health hp;
 
     private void Awake()
     {
@@ -51,7 +57,7 @@ public class Boid : MonoBehaviour
         this.player = player;
         position = transform.position;
         forward = transform.forward;
-
+        hp = GetComponent<Health>();
         velocity = transform.forward * (settings.minSpeed+settings.maxSpeed)/2;
     }
     // Update is called once per frame

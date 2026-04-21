@@ -2,8 +2,10 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class BoidManager : MonoBehaviour
 {
@@ -12,15 +14,26 @@ public class BoidManager : MonoBehaviour
     public BoidSettings settings;
     public ComputeShader compute;
     private List<Boid> boids;
+    private List<List<Boid>> boidMatrix;
     [SerializeField]
     private GameObject corpseObject;
     [SerializeField]
     private Transform player;
 
-    Canvas canvas;
+    [SerializeField]
+    private Canvas canvas;
     private TextMeshProUGUI textUI;
     int deadBoidCount = 0;
     int initialBoidCount = 0;
+
+    //Vector3 bottomCorner = Vector3.zero;
+    //Vector3 topCorner = Vector3.zero;
+    [SerializeField]
+    private Vector3 boidActiveZoneSize = Vector3.one;
+
+    private Vector3 regionOffset;
+    private Vector3Int gridSizes;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -30,9 +43,57 @@ public class BoidManager : MonoBehaviour
         {
             boido.Initialize(settings,player);
         }
-        canvas = GetComponentInChildren<Canvas>();
+        if (!canvas)
+        {
+            canvas = GetComponentInChildren<Canvas>();
+        }
         textUI = canvas.GetComponentInChildren<TextMeshProUGUI>();
         initialBoidCount = boids.Count;
+
+        GenerateBoidGrid();
+        AssignBoidsToGrid(boids);
+
+
+    }
+    private void GenerateBoidGrid()
+    {
+        float regionSize = 2*settings.perceptionRadius;
+        Vector3 size = boidActiveZoneSize;
+        float numRegionsX = Mathf.Ceil(size.x/ regionSize)+2;
+        float numRegionsY = Mathf.Ceil(size.y/ regionSize)+2;
+        float numRegionsZ = Mathf.Ceil(size.z/ regionSize)+2;
+        boidMatrix = new List<List<Boid>>();
+        for (int i=0;i<numRegionsX*numRegionsX*numRegionsZ;i++)
+        {
+            boidMatrix.Add(new List<Boid>());
+        }
+        gridSizes = new Vector3Int((int) numRegionsX, (int) numRegionsY, (int) numRegionsZ);
+        //i = y * (Z_MAX * X_MAX) + Z * (X_MAX) + x
+        regionOffset = new Vector3(numRegionsX,numRegionsY,numRegionsZ) *-regionSize / 2;
+
+    }
+    private void AssignBoidsToGrid(List<Boid> boids)
+    {
+        for (int i = 0; i < boids.Count; i++)
+        {
+            Vector3 boidPos = boids[i].transform.position;
+            Vector3 regionPos = (boidPos - regionOffset) / (2 * settings.perceptionRadius);
+
+            int value = Mathf.FloorToInt(regionPos.y) * (gridSizes.z * gridSizes.x) + Mathf.FloorToInt(regionPos.z) * (gridSizes.x) + Mathf.FloorToInt(regionPos.x);
+            boidMatrix[value].Add(boids[i]);
+            boids[i].localGridIndex = value;
+        }
+    }
+    private void UpdateLocalGrid(Boid boid)
+    {
+        Vector3 boidPos = boid.transform.position;
+        Vector3 regionPos = (boidPos - regionOffset) / (2 * settings.perceptionRadius);
+        int oldValue = boid.localGridIndex;
+        int value = Mathf.FloorToInt(regionPos.y) * (gridSizes.z * gridSizes.x) + Mathf.FloorToInt(regionPos.z) * (gridSizes.x) + Mathf.FloorToInt(regionPos.x);
+
+        boidMatrix[oldValue].Remove(boid);
+        boidMatrix[value].Add(boid);
+        boid.localGridIndex = value;
     }
 
     // Update is called once per frame
@@ -53,6 +114,27 @@ public class BoidManager : MonoBehaviour
             boidData[i].fearLevel = boids[i].fearLevel;
             boidData[i].isDead = boids[i].isAlreadyDead?1:0;
         }
+        int[] matrixCounts = new int[boidMatrix.Count+1];
+        int count = 0;
+
+        for (int i = 0; i < matrixCounts.Length; i++)
+        {
+
+            matrixCounts[i] = count;
+            if (i < matrixCounts.Length - 1)
+            {
+                count += boidMatrix[i].Count;
+
+            }
+            else
+            {
+                count = numBoids;
+            }
+            
+
+        }
+
+        boidMatrix.SelectMany(i => i);
         //Create Compute buffer using data
         ComputeBuffer boidBuffer = new ComputeBuffer(numBoids, BoidData.Size);
         //set computer buffer and other inputs
@@ -94,6 +176,8 @@ public class BoidManager : MonoBehaviour
             {
 
                 boids[i].UpdateBoid();
+                UpdateLocalGrid(boids[i]);
+
             }
 }
 
@@ -117,6 +201,15 @@ public class BoidManager : MonoBehaviour
         }
     }
 
+    void OnDrawGizmosSelected()
+    {
+        Vector3 pos = transform.position;
+        Vector3 size = boidActiveZoneSize;
+        Gizmos.color = new Color(255, 165, 0);
+        Gizmos.DrawWireCube(pos, size);
+
+
+    }
     public struct BoidData
     {
         public Vector3 position;

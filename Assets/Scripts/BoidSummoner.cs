@@ -30,6 +30,8 @@ public class BoidSummoner : MonoBehaviour
     private Color gizmoColor=Color.green;
     [SerializeField]
     private float gizmoOpacity = 0.3f;
+    [SerializeField]
+    private float boidCheckRadius=0.5f;
 
     private void Awake()
     {
@@ -41,9 +43,15 @@ public class BoidSummoner : MonoBehaviour
             }
             else if (summoningType == SummoningType.Cube)
             {
-                float x = Random.Range(-scale.x / 2, scale.x / 2);
-                float y = Random.Range(-scale.y / 2, scale.y / 2);
-                float z = Random.Range(-scale.z / 2, scale.z / 2);
+                float x, y, z;
+                do
+                {
+
+                    x = Random.Range(-scale.x / 2, scale.x / 2);
+                    y = Random.Range(-scale.y / 2, scale.y / 2);
+                    z = Random.Range(-scale.z / 2, scale.z / 2);
+
+                } while (!Physics.CheckSphere(position + new Vector3(x, y, z), boidCheckRadius));
                 position = transform.position + new Vector3(x, y, z);
             }
             Vector3 dir = Random.insideUnitSphere;
