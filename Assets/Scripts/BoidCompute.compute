@@ -20,10 +20,17 @@ struct Boid {
     int flockSize;
 
     int isDead;
+    
+    int localGridIndex;
 };
 
 RWStructuredBuffer<Boid> boids;
+RWStructuredBuffer<int> indexBuffer;
+RWStructuredBuffer<int> localOffsetBuffer;
 int numBoids;
+int gridXMax;
+int gridZMax;
+int gridYMax;
 float viewRadius;
 float avoidRadius;
 float maxFear;
@@ -32,8 +39,50 @@ float3 playerPosition;
 [numthreads(threadGroupSize,1,1)]
 void BoidCalc (uint3 id : SV_DispatchThreadID)
 {
-
+    
+    //Things to Add to ComputeBuffer
+    //localOffsetBuffer
+    //code that takes the localgrid index and checks each valid localgrid
     // TODO: insert actual code here!
+    for(int offsetIndex=0;offsetIndex<27;offsetIndex++){
+        int region = boids[id.x].localGridIndex+localOffsetBuffer[offsetIndex];
+        int startIndex = indexBuffer[region];
+        int regionSize = indexBuffer[region+1]-startIndex;
+
+        for(int index = startIndex; index<startIndex+regionSize;index++){
+            if(index!=id.x){
+                //for all other boids: if offset magnatude is less than viewRadius
+                //increment flockSize, and increase flockdirection and center.
+                float3 offset = boids[index].position-boids[id.x].position;
+
+                //if we just use both sides already squared, we don't need to do any square rooting for distance, since we just need to compare them
+                float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z;
+
+                if(offsetDistSqr < (viewRadius*viewRadius)){
+                    if(boids[index].isDead){
+                        if(boids[id.x].fearLevel<maxFear){
+                            boids[id.x].fearLevelChange+=1;
+                        }
+                        continue;
+                    }
+                    boids[id.x].flockSize+=1;
+                    boids[id.x].flockDir+=boids[index].direction;
+                    boids[id.x].flockCenter+=boids[index].position;
+                    boids[id.x].flockFearLevel+=boids[index].fearLevel;
+                    //if magnatude is less than avoid, subtract heading by the offset, divided by distance so closer=stronger
+                    if(offsetDistSqr<(avoidRadius*avoidRadius)){
+
+                        boids[id.x].separationDir -= offset/offsetDistSqr;
+                    }
+                }
+            
+
+            }
+        }
+    }
+
+
+    /*
     for (int index=0;index<numBoids;index++){
         if(index!=id.x){
             //for all other boids: if offset magnatude is less than viewRadius
@@ -41,7 +90,7 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
             float3 offset = boids[index].position-boids[id.x].position;
 
             //if we just use both sides already squared, we don't need to do any square rooting for distance, since we just need to compare them
-            float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z;
+            float3 offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z;
 
             if(offsetDistSqr <(viewRadius*viewRadius)){
                 if(boids[index].isDead){
@@ -64,5 +113,5 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
 
         }
 
-    }
+    }*/
 }
