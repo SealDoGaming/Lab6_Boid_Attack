@@ -44,7 +44,7 @@ public class Boid : MonoBehaviour
     Material boidMaterial;
 
     private Transform player;
-    private Health hp;
+    private health hp;
 
     private void Awake()
     {
@@ -57,8 +57,9 @@ public class Boid : MonoBehaviour
         this.player = player;
         position = transform.position;
         forward = transform.forward;
-        hp = GetComponent<Health>();
+        hp = GetComponent<health>();
         velocity = transform.forward * (settings.minSpeed+settings.maxSpeed)/2;
+        fearLevel = 5;
     }
     // Update is called once per frame
     public void UpdateBoid()
@@ -191,17 +192,25 @@ public class Boid : MonoBehaviour
     private Vector3 ObstacleRays()
     {
         Vector3[] rayDirections = BoidHelper.directions;
-        
+        Vector3 lastDir = forward;
+        float lastDist = 0f;
         for (int i=0; i < rayDirections.Length; i++)
         {
             Vector3 wackDir = rayDirections[i];
             Vector3 dir = transform.TransformDirection(rayDirections[i]);
             Ray ray = new Ray(position, dir);
-            if (!Physics.SphereCast(ray, settings.raycastRadius, settings.obstacleSightRadius, settings.obstacleMask)){
+            
+            if (!Physics.SphereCast(ray, settings.raycastRadius, out var hit, settings.obstacleSightRadius, settings.obstacleMask, QueryTriggerInteraction.Collide))
+            {
                 return dir;
             }
+            else if(hit.distance>lastDist)
+            {
+                lastDir = dir;
+                lastDist = hit.distance;
+            }
         }
-        return forward;
+        return lastDir;
 
     }
     private Vector3 ObstacleRays(Vector3 desiredDirection)

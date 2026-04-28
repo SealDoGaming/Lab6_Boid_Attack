@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MouseRotator : MonoBehaviour {
 	
@@ -21,29 +22,36 @@ public class MouseRotator : MonoBehaviour {
 	public bool autoZeroVerticalOnMobile = true;
 	public bool autoZeroHorizontalOnMobile = false;
 	public bool relative = true;
-	Vector3 targetAngles;
+
+    Vector3 targetAngles;
 	Vector3 followAngles;
 	Vector3 followVelocity;
 	Quaternion originalRotation;
 
-	
+	bool disabled = false;
 	// Use this for initialization
 	void Start () {
 		originalRotation = transform.localRotation;
+
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
-		
+	void Update() {
+
 		// we make initial calculations from the original local rotation
 		transform.localRotation = originalRotation;
 
-		// read input from mouse or mobile controls
-		float inputH = 0;
+        if (disabled)
+        {
+            transform.localRotation = originalRotation * Quaternion.Euler(-followAngles.x, followAngles.y, 0);
+            return;
+        }
+        // read input from mouse or mobile controls
+        float inputH = 0;
 		float inputV = 0;
 		if (relative)
 		{
-			
+
 			inputH = Input.GetAxis("Mouse X");
 			inputV = Input.GetAxis("Mouse Y");
 			
@@ -66,8 +74,8 @@ public class MouseRotator : MonoBehaviour {
 			inputH = Input.mousePosition.x;
 			inputV = Input.mousePosition.y;
 
-			// set values to allowed range
-			targetAngles.y = Mathf.Lerp ( -rotationRange.y * 0.5f, rotationRange.y * 0.5f, inputH/Screen.width );
+            // set values to allowed range
+            targetAngles.y = Mathf.Lerp ( -rotationRange.y * 0.5f, rotationRange.y * 0.5f, inputH/Screen.width );
 			targetAngles.x = Mathf.Lerp ( -rotationRange.x * 0.5f, rotationRange.x * 0.5f, inputV/Screen.height );
 
 
@@ -85,6 +93,9 @@ public class MouseRotator : MonoBehaviour {
 		transform.localRotation = originalRotation * Quaternion.Euler( -followAngles.x, followAngles.y, 0 );
 		
 	}
-
+	public void SetLock(bool locked)
+	{
+		disabled = locked;
+	}
 
 }

@@ -52,6 +52,7 @@ public class FirstPersonCharacter : MonoBehaviour
 	
 	void Update()
 	{
+		/*
 		if (Input.GetMouseButtonUp(0))
 		{
 			Cursor.lockState = CursorLockMode.Locked;
@@ -61,7 +62,7 @@ public class FirstPersonCharacter : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-        }
+        }*/
 	}
 	
 	

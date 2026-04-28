@@ -12,8 +12,8 @@ public class WeaponSystem : MonoBehaviour
 {
 	public GameObject[] weapons;				// The array that holds all the weapons that the player has
 	public int startingWeaponIndex = 0;			// The weapon index that the player will start with
-	private int weaponIndex;					// The current index of the active weapon
-
+	private int weaponIndex;                    // The current index of the active weapon
+	private bool locked = false;
 
 	// Use this for initialization
 	void Start()
@@ -27,6 +27,10 @@ public class WeaponSystem : MonoBehaviour
 	void Update()
 	{
 		// Allow the user to instantly switch to any weapon
+		if (locked)
+		{
+			return;
+		}
 		if (Input.GetButtonDown("Weapon 1"))
 			SetActiveWeapon(0);
 		if (Input.GetButtonDown("Weapon 2"))
@@ -85,7 +89,7 @@ public class WeaponSystem : MonoBehaviour
 		for (int i = 0; i < weapons.Length; i++)
 		{
 			weapons[i].SetActive(false);
-		}
+        }
 
 		// Activate the one weapon that we want
 		weapons[index].SetActive(true);
@@ -106,4 +110,26 @@ public class WeaponSystem : MonoBehaviour
 			weaponIndex = weapons.Length - 1;
 		SetActiveWeapon(weaponIndex);
 	}
+
+	public void LockWeapons()
+    {
+		if (!locked) {
+            // Start be deactivating all weapons
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                weapons[i].SetActive(false);
+            }
+        }
+		locked = true;
+    }
+
+	public void UnlockWeapons()
+	{
+		if (locked)
+		{
+			SetActiveWeapon(weaponIndex);
+        }
+		locked = false;
+    }
+
 }

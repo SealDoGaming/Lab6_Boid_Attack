@@ -17,6 +17,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public enum WeaponType
 {
@@ -206,7 +207,9 @@ public class Weapon : MonoBehaviour
 	public AudioClip dryFireSound;						// Sound to play when the user tries to fire but is out of ammo
 
 	// Other
-	private bool canFire = true;						// Whether or not the weapon can currently fire (used for semi-auto weapons)
+	private bool canFire = true;                        // Whether or not the weapon can currently fire (used for semi-auto weapons)
+
+	private bool locked = false;
 
 
 	// Use this for initialization
@@ -1125,6 +1128,10 @@ public class Weapon : MonoBehaviour
 
         return hitMesh;
     }
+	
+
+
+
 }
 
 
