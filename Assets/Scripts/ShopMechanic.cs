@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static ShopItem;
+using static UnityEditor.Progress;
 using static UnityEngine.InputSystem.InputAction;
 
 public class ShopMechanic : MonoBehaviour
@@ -24,6 +26,9 @@ public class ShopMechanic : MonoBehaviour
     public GameObject shopItemUIPrefab;
 
     public ShopItem[] shopItems;
+
+    private ShopItemUI[] shopUIList;
+    private GameObject[] purchasedWeapons;
 
     public event Action<List<(Collider, Vector3)>> Hit;
 
@@ -58,6 +63,8 @@ public class ShopMechanic : MonoBehaviour
     private void InititalizeShop()
     {
         ShopItemUI itemUIBase = shopItemUIPrefab.GetComponent<ShopItemUI>();
+        shopUIList = new ShopItemUI[shopItems.Length];
+        purchasedWeapons = new GameObject[shopItems.Length];
 
         int baseOffset = itemUIBase.baseOffset;
         int indexOffset = itemUIBase.indexOffset;
@@ -67,20 +74,100 @@ public class ShopMechanic : MonoBehaviour
 
         for (int i = 0; i < shopItems.Length; i++)
         {
-            ShopItem item = shopItems[i];
+            //ShopItem item = shopItems[i];
 
             ShopItemUI itemUI =GameObject.Instantiate(shopItemUIPrefab,shopContentView).GetComponent<ShopItemUI>();
+            shopUIList[i] = itemUI;
             RectTransform itemTransform = itemUI.GetComponent<RectTransform>();
             itemTransform.anchoredPosition = new Vector2(0, -baseOffset - indexOffset * i);
-            string price = "$" + item.initialCost;
-            itemUI.Initialize(item.name, price, item.icon, i);
+            InitializeShopItem(i);
             itemUI.purchaseButton.onClick.AddListener(() => PurchaseItem(itemUI.index));
         }
+    }
+    private void InitializeShopItem(int index)
+    {
+
+        ShopItem item = shopItems[index];
+        string purchaseText = "Buy " + item.itemType.ToString();
+        if (item.specialPurchaseText.Length > 0)
+        {
+            purchaseText = item.specialPurchaseText;
+        }
+        shopUIList[index].Initialize(item.name, item.initialCost, item.icon, index, purchaseText);
+    }
+    private void ReplaceShopItem(ShopItem newItem,int index)
+    {
+        shopItems[index] = newItem;
+        ShopItem item = newItem;
+        string purchaseText = "Buy " + item.itemType.ToString();
+        if (string.IsNullOrEmpty(item.specialPurchaseText))
+        {
+            purchaseText = item.specialPurchaseText;
+        }
+        shopUIList[index].Initialize(item.name, item.initialCost, item.icon, index, purchaseText);
     }
 
     private void PurchaseItem(int index)
     {
-        Debug.Log("Purchase item: " + index);
+        ShopItem item = shopItems[index];
+        ItemType type = item.itemType;
+        //Add Gun
+
+
+        if ((type == ItemType.Gun || type==ItemType.Consumbable)&&purchasedWeapons[index] == null) {
+            GameObject weapon = Instantiate(item.prefab, weaponsSystem.transform);
+            weapon.transform.localPosition = item.position;
+            weapon.transform.localScale = item.scale;
+            weaponsSystem.AddWeapon(weapon);
+            weapon.SetActive(false);
+            purchasedWeapons[index]=weapon;
+            cash -= item.initialCost;
+        }
+        else if(type==ItemType.Ammo||type==ItemType.Consumbable) {
+            if (purchasedWeapons[index].TryGetComponent<Weapon>(out var weapon)){
+                //weapon
+            }
+           
+            
+        }else
+        {
+
+        }
+        //If replacement
+        if (item.disableWhenPurchased)
+        {
+            ShopItemUI itemUI = shopUIList[index];
+            itemUI.purchaseButton.interactable = false;
+            itemUI.purchaseLabel.text = "Out of Stock";
+
+        }
+        if (item.replaceWhenPurchased && item.replacement != null)
+        {
+            ReplaceShopItem(item.replacement,index);
+
+
+
+        }
+        else if (item.replacement == null)
+        {
+            Debug.Log("This is bad. Do not do this. There should be a replacement if replacement is enabled");
+        }
+
+
+
+
+
+
+
+        if (type == ItemType.Other)
+        {
+            Debug.Log("Purchase item: " + index);
+
+        }
+        
+        
+
+
     }
 
     private void OnOpenMenu(CallbackContext c)

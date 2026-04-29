@@ -7,6 +7,8 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 public class WeaponSystem : MonoBehaviour
 {
@@ -131,5 +133,33 @@ public class WeaponSystem : MonoBehaviour
         }
 		locked = false;
     }
+	public void AddWeapon(GameObject weapon)
+	{
+		List<GameObject> tempList = weapons.ToList();
+		tempList.Add(weapon);
+		weapons = tempList.ToArray();
+		weaponIndex = weapons.Length - 1;
+	}
+	public void RemoveWeapon(GameObject weapon)
+    {
+        List<GameObject> tempList = weapons.ToList();
+		if (tempList.Contains(weapon))
+		{
+			tempList.Remove(weapon);
+            weapons = tempList.ToArray();
+			if (weaponIndex < weapons.Length)
+            {
+				SetActiveWeapon(weaponIndex);
 
+
+
+			}
+			else
+			{
+				SetActiveWeapon(0);
+			}
+        }
+
+
+    }
 }

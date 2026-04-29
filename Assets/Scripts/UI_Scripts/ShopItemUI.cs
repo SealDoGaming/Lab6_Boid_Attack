@@ -26,14 +26,32 @@ public class ShopItemUI : MonoBehaviour
 
     public int index = 0;
 
-    public void Initialize(string name,string priceText,Texture2D image, int index, string purchaseText = "Buy Gun")
+    public void Initialize(string name,int price,Texture2D image, int index, string purchaseText = "Buy Gun")
     {
         nameLabel.text = name;
-        priceLabel.text = priceText;
+        priceLabel.text = "$" + price;
         iconImage.texture = image;
         this.index = index;
         purchaseLabel.text = purchaseText;
 
+    }
+
+    public void SetPrice(int price)
+    {
+        priceLabel.text = "$" + price;
+    }
+
+    public void SetName(string name)
+    {
+        nameLabel.text = name;
+    }
+    public void SetImage(Texture2D image)
+    {
+        iconImage.texture = image;
+    }
+    public void SetPurchaseText(string purchaseText)
+    {
+        purchaseLabel.text = purchaseText;
     }
 
 
