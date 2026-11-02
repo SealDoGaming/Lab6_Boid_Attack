@@ -131,10 +131,20 @@ public class WeaponEditor : Editor
 				if (!weapon.infiniteAmmo)
 				{
 					weapon.ammoCapacity = EditorGUILayout.IntField("Ammo Capacity", weapon.ammoCapacity);
-					weapon.reloadTime = EditorGUILayout.FloatField("Reload Time", weapon.reloadTime);
+
+                    weapon.infiniteReseve = EditorGUILayout.Toggle("Infinite Reserve", weapon.infiniteReseve);
+                    if (!weapon.infiniteReseve)
+                    {
+						weapon.maxReserveCapacity = EditorGUILayout.IntField("Max Reserve Capacity", weapon.maxReserveCapacity);
+						weapon.initialReserveCapacity = EditorGUILayout.IntField("Initial Reserve Capacity", weapon.initialReserveCapacity);
+    
+					}
+                    weapon.reloadTime = EditorGUILayout.FloatField("Reload Time", weapon.reloadTime);
 					weapon.showCurrentAmmo = EditorGUILayout.Toggle("Show Current Ammo", weapon.showCurrentAmmo);
 					weapon.reloadAutomatically = EditorGUILayout.Toggle("Reload Automatically", weapon.reloadAutomatically);
 				}
+
+
 				weapon.shotPerRound = EditorGUILayout.IntField("Shots Per Round", weapon.shotPerRound);
 			}
 		}

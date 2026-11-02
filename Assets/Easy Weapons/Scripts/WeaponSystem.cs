@@ -5,10 +5,12 @@
 /// This script allows the player to switch weapons in two ways, by pressing the numbers corresponding to each weapon, or by scrolling with the mouse.
 /// </summary>
 
-using UnityEngine;
+using System;
 using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
 
 public class WeaponSystem : MonoBehaviour
 {
@@ -16,6 +18,8 @@ public class WeaponSystem : MonoBehaviour
 	public int startingWeaponIndex = 0;			// The weapon index that the player will start with
 	private int weaponIndex;                    // The current index of the active weapon
 	private bool locked = false;
+	[SerializeField]
+	private TextMeshProUGUI ammoText;
 
 	// Use this for initialization
 	void Start()
@@ -61,9 +65,40 @@ public class WeaponSystem : MonoBehaviour
 
 	void OnGUI()
 	{
+        if (weapons[weaponIndex].GetComponent<Weapon>())
+        {
+			Weapon weapon = weapons[weaponIndex].GetComponent<Weapon>();
 
+            if (weapon.type == WeaponType.Beam)
+			{
+				ammoText.text = "Heat: " + weapon.GetHeat();
+			}
+			else
+			{
+				string text = "Ammo: ";
+				int ammo = weapon.GetCurrentAmmo();
+				if (ammo == -1)
+				{
+					ammoText.text = text + "Yes";
+					return;
+				}
+				text += ammo;
+				int reserve = weapon.GetCurrentReserve();
+				if (reserve == -1)
+				{
+					ammoText.text = text;
+					return;
+				}
+				ammoText.text = text + " / " + reserve;
 
-	}
+            }
+
+		}
+		else
+		{
+			ammoText.text = "Ammo: Its an axe, Stupid";
+		}
+    }
 
 	public void SetActiveWeapon(int index)
 	{

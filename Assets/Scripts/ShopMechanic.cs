@@ -2,16 +2,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using static ShopItem;
-using static UnityEditor.Progress;
 using static UnityEngine.InputSystem.InputAction;
 
 public class ShopMechanic : MonoBehaviour
 {
     public InputAction OpenMenu;
     public InputAction OpenShop;
+
+    public int startingCash = 0;
 
     public WeaponSystem weaponsSystem;
 
@@ -25,12 +30,30 @@ public class ShopMechanic : MonoBehaviour
     public RectTransform shopContentView;
     public GameObject shopItemUIPrefab;
 
+
+
+    public Button optionsButton;
+    public Button unstuckButton;
+    public Button mainMenuButton;
+    public Button selfDestructButton;
+
+
+
+    public TextMeshProUGUI shopTitle;
     public ShopItem[] shopItems;
 
     private ShopItemUI[] shopUIList;
+
     private GameObject[] purchasedWeapons;
 
-    public event Action<List<(Collider, Vector3)>> Hit;
+
+    public Rigidbody phone;
+
+    public GameObject selfDestructExplosion;
+    public Transform explosionTargetTransform;
+
+    public Transform unstuckSpot;
+    public TextMeshProUGUI cashText;
 
     bool menuOpen = false;
     bool shopOpen = false;
@@ -46,21 +69,24 @@ public class ShopMechanic : MonoBehaviour
         OpenShop.performed += OnOpenShop;
         OpenMenu.Enable();
         OpenShop.Enable();
-        InititalizeShop();
+        InitializeMenuButtons();
+        cash = startingCash;
+        InitializeShop();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        cashText.text = "Cash: $" + cash;
     }
+    #region Shop Methods
 
     public void AddCash(int money)
     {
         cash += money;
     }
 
-    private void InititalizeShop()
+    private void InitializeShop()
     {
         ShopItemUI itemUIBase = shopItemUIPrefab.GetComponent<ShopItemUI>();
         shopUIList = new ShopItemUI[shopItems.Length];
@@ -69,7 +95,7 @@ public class ShopMechanic : MonoBehaviour
         int baseOffset = itemUIBase.baseOffset;
         int indexOffset = itemUIBase.indexOffset;
         Vector2 contentSize = shopContentView.sizeDelta;
-        contentSize.y = indexOffset * shopItems.Length;
+        contentSize.y = indexOffset * (shopItems.Length+1)+25;
         shopContentView.sizeDelta = contentSize;
 
         for (int i = 0; i < shopItems.Length; i++)
@@ -93,18 +119,18 @@ public class ShopMechanic : MonoBehaviour
         {
             purchaseText = item.specialPurchaseText;
         }
-        shopUIList[index].Initialize(item.name, item.initialCost, item.icon, index, purchaseText);
+        shopUIList[index].Initialize(item.name, item.price, item.icon, index, purchaseText);
     }
     private void ReplaceShopItem(ShopItem newItem,int index)
     {
         shopItems[index] = newItem;
         ShopItem item = newItem;
         string purchaseText = "Buy " + item.itemType.ToString();
-        if (string.IsNullOrEmpty(item.specialPurchaseText))
+        if (!string.IsNullOrEmpty(item.specialPurchaseText))
         {
             purchaseText = item.specialPurchaseText;
         }
-        shopUIList[index].Initialize(item.name, item.initialCost, item.icon, index, purchaseText);
+        shopUIList[index].Initialize(item.name, item.price, item.icon, index, purchaseText);
     }
 
     private void PurchaseItem(int index)
@@ -112,22 +138,25 @@ public class ShopMechanic : MonoBehaviour
         ShopItem item = shopItems[index];
         ItemType type = item.itemType;
         //Add Gun
-
+        if (cash < item.price)
+        {
+            return;
+        }
 
         if ((type == ItemType.Gun || type==ItemType.Consumbable)&&purchasedWeapons[index] == null) {
             GameObject weapon = Instantiate(item.prefab, weaponsSystem.transform);
             weapon.transform.localPosition = item.position;
             weapon.transform.localScale = item.scale;
+            weapon.GetComponent<Weapon>().SetCurrentAmmo(item.ammoPurchaseAmount);
             weaponsSystem.AddWeapon(weapon);
             weapon.SetActive(false);
             purchasedWeapons[index]=weapon;
-            cash -= item.initialCost;
+            cash -= item.price;
         }
         else if(type==ItemType.Ammo||type==ItemType.Consumbable) {
-            if (purchasedWeapons[index].TryGetComponent<Weapon>(out var weapon)){
-                //weapon
-            }
-           
+            purchasedWeapons[index].GetComponent<Weapon>().AddAmmoToReserve(item.ammoPurchaseAmount);
+            cash-= item.price;
+
             
         }else
         {
@@ -148,7 +177,7 @@ public class ShopMechanic : MonoBehaviour
 
 
         }
-        else if (item.replacement == null)
+        else if (item.replaceWhenPurchased && item.replacement == null)
         {
             Debug.Log("This is bad. Do not do this. There should be a replacement if replacement is enabled");
         }
@@ -169,7 +198,75 @@ public class ShopMechanic : MonoBehaviour
 
 
     }
+    #endregion
 
+    #region Menu Button Methods
+    private void InitializeMenuButtons()
+    {
+        optionsButton.onClick.AddListener(() => OpenOptions());
+        unstuckButton.onClick.AddListener(() => Unstuck());
+        mainMenuButton.onClick.AddListener(() => QuitToMainMenu());
+        selfDestructButton.onClick.AddListener(() => SelfDestruct());
+    }
+    private void OpenOptions()
+    {
+
+    }
+
+    private void Unstuck()
+    {
+        transform.position = unstuckSpot.position;
+        transform.rotation = unstuckSpot.rotation;
+        OnOpenMenu(new CallbackContext());
+    }
+
+    private void QuitToMainMenu()
+    {
+
+        SceneManager.LoadScene("BoidScene3");
+    }
+    
+    private void SelfDestruct()
+    {
+        phone.useGravity = true;
+        phone.isKinematic = false;
+        phone.transform.parent = null;
+
+        GameObject explosion = Instantiate(selfDestructExplosion, explosionTargetTransform);
+        explosion.transform.localScale = Vector3.one;
+        explosion.transform.localPosition = Vector3.zero;
+        explosion.transform.localRotation = Quaternion.identity;
+        SetGameLayerRecursive(explosion, explosionTargetTransform.gameObject.layer);
+        //SetPhoneBackground(brokenScreenMAT);
+        StopAllCoroutines();
+        moving = true;
+        StartCoroutine(DeathPause());
+
+    }
+    private void SetGameLayerRecursive(GameObject _go, int _layer)
+    {
+        _go.layer = _layer;
+        foreach (Transform child in _go.transform)
+        {
+            child.gameObject.layer = _layer;
+
+            Transform _HasChildren = child.GetComponentInChildren<Transform>();
+            if (_HasChildren != null)
+                SetGameLayerRecursive(child.gameObject, _layer);
+
+        }
+    }
+
+    private IEnumerator DeathPause()
+    {
+        yield return new WaitForSeconds(0.25f);
+        //Debug.Break();
+        Application.Quit();
+    }
+    #endregion
+
+
+    #region Phone Control Methods
     private void OnOpenMenu(CallbackContext c)
     {
         if (shopOpen||moving)
@@ -186,7 +283,6 @@ public class ShopMechanic : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-
             menuOpen = false;
             weaponsSystem.UnlockWeapons();
             moving = true;
@@ -201,6 +297,7 @@ public class ShopMechanic : MonoBehaviour
             }
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
+            //SetPhoneBackground(menuScreenMAT);
 
 
             menuOpen = true;
@@ -229,6 +326,7 @@ public class ShopMechanic : MonoBehaviour
 
 
             shopOpen = false;
+            moving = true;
             weaponsSystem.UnlockWeapons();
             
             StartCoroutine(OnPhoneAway());
@@ -242,9 +340,11 @@ public class ShopMechanic : MonoBehaviour
             }
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
+            //SetPhoneBackground(shopScreenMAT);  
 
 
             shopOpen = true;
+            moving = true;
             StartCoroutine(OnPhoneOpened());
             shopMenu.SetActive(true);
             //weaponsSystem.LockWeapons();
@@ -269,7 +369,6 @@ public class ShopMechanic : MonoBehaviour
         moving = false;
     }
 
-
-
+    #endregion
 
 }

@@ -18,7 +18,8 @@ public enum ProjectileType
 public enum DamageType
 {
 	Direct,
-	Explosion
+	Explosion,
+	Object
 }
 
 public class Projectile : MonoBehaviour
@@ -123,6 +124,10 @@ public class Projectile : MonoBehaviour
 	void Hit(Collision col)
 	{
 		// Make the projectile explode
+		if (damageType == DamageType.Object)
+		{
+			return;
+		}
 		Explode(col.contacts[0].point);
 
 		// Apply damage to the hit object if damageType is set to Direct

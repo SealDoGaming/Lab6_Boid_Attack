@@ -5,6 +5,13 @@
 static const int threadGroupSize = 1024;
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
+
+struct Target {
+    float3 position;
+    float radius;
+    float weight;
+};
+
 struct Boid {
     float3 position;
     float3 direction;
@@ -12,6 +19,9 @@ struct Boid {
     float3 flockDir;
     float3 flockCenter;
     float3 separationDir;
+
+    float3 targetDir;
+    //int targetCount;
 
     float fearLevel;
     float fearLevelChange;
@@ -22,6 +32,8 @@ struct Boid {
     int isDead;
 };
 
+RWStructuredBuffer<Target> targets;
+int numTargets;
 RWStructuredBuffer<Boid> boids;
 int numBoids;
 float viewRadius;
@@ -45,9 +57,9 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
 
             if(offsetDistSqr <(viewRadius*viewRadius)){
                 if(boids[index].isDead){
-                    if(boids[id.x].fearLevel<maxFear){
-                        boids[id.x].fearLevelChange+=1;
-                    }
+                    //if(boids[id.x].fearLevel<maxFear){
+                    //    boids[id.x].fearLevelChange+=1;
+                    //}
                     continue;
                 }
                 boids[id.x].flockSize+=1;
@@ -60,9 +72,18 @@ void BoidCalc (uint3 id : SV_DispatchThreadID)
                     boids[id.x].separationDir -= offset/offsetDistSqr;
                 }
             }
-            
-
         }
-
     }
+    float dist = 999;
+    for(int index=0;index<numTargets;index++){
+        float3 offset = targets[index].position-boids[id.x].position;
+        float targetRadius = targets[index].radius;
+        float offsetDistSqr = offset.x*offset.x+offset.y*offset.y+offset.z*offset.z;
+        if(offsetDistSqr <(targetRadius*targetRadius) && offsetDistSqr<dist){
+            dist = offsetDistSqr;
+            boids[id.x].targetDir= (offset/offsetDistSqr)*targets[index].weight;
+        }
+        
+    }
+
 }
