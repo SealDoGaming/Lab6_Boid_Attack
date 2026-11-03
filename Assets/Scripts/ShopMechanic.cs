@@ -223,7 +223,7 @@ public class ShopMechanic : MonoBehaviour
     private void QuitToMainMenu()
     {
 
-        SceneManager.LoadScene("BoidScene3");
+        SceneManager.LoadScene("TitleScene");
     }
     
     private void SelfDestruct()

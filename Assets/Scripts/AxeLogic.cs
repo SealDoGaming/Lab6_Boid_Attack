@@ -6,14 +6,28 @@ public class AxeLogic : MonoBehaviour
 {
 
     public InputAction axeSwing;
+
+    public AudioSource audio;
+
+    [SerializeField]
+     WeightedAudio[] playableAudio;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Animation axeAnimation;
     private bool isAttacking=false;
+
+    private bool useAudio = true;
+    private bool didKillBoid = false;
+    private bool didPlay = false;
+
+
+    private WeightedAudioSelecter randomAudioList;
     private void Awake()
     {
         axeAnimation = GetComponentInChildren<Animation>();
         axeSwing.performed += TriggerAxe;
         axeSwing.Enable();
+        randomAudioList = new WeightedAudioSelecter(playableAudio);
+
     }
 
     // Update is called once per frame
@@ -22,6 +36,13 @@ public class AxeLogic : MonoBehaviour
         if(isAttacking&&!axeAnimation.isPlaying)
         {
             isAttacking = false;
+            didKillBoid = false;
+            didPlay = false;
+        }
+        if(useAudio&&!didPlay&& isAttacking && didKillBoid)
+        {
+            audio.PlayOneShot(randomAudioList.RandomClip());
+            didPlay = true;
         }
     }
     private void TriggerAxe(CallbackContext c)
@@ -63,6 +84,8 @@ public class AxeLogic : MonoBehaviour
         {
             //Debug.Log("Killed2");
             doomedBoid.isAlreadyDead = true;
+            didKillBoid = true;
+
         }
     }
 }

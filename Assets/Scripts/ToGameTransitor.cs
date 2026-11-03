@@ -13,6 +13,7 @@ public class ToGameTransitor : MonoBehaviour
     Texture2D title2;
     [SerializeField]
     RawImage overlay;
+    private bool isTrans = false;
     void Start()
     {
         
@@ -27,7 +28,12 @@ public class ToGameTransitor : MonoBehaviour
     public void GoToGame1()
     {
         titleThingy.texture= title2;
-        StartCoroutine(Transition1());
+        if (!isTrans)
+        {
+            isTrans = true;
+            StartCoroutine(Transition1());
+
+        }
     }
 
     public IEnumerator Transition1()
@@ -35,7 +41,7 @@ public class ToGameTransitor : MonoBehaviour
         yield return new WaitForSeconds(1f);
         for(int i = 0; i < 50; i++)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
             overlay.color = new Color(0, 0, 0, Mathf.InverseLerp(0, 50, i));
         }
 
