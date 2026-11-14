@@ -9,6 +9,7 @@ public class FirstPersonCharacter : MonoBehaviour
 	
 	[SerializeField] private AdvancedSettings advanced = new AdvancedSettings();        // The container for the advanced settings ( done this way so that the advanced setting are exposed under a foldout
 	[SerializeField] private bool lockCursor = true;
+	[SerializeField] private LayerMask terraignMask;
 
 	[System.Serializable]
 	public class AdvancedSettings                                                       // The advanced settings
@@ -52,6 +53,7 @@ public class FirstPersonCharacter : MonoBehaviour
 	
 	void Update()
 	{
+		/*
 		if (Input.GetMouseButtonUp(0))
 		{
 			Cursor.lockState = CursorLockMode.Locked;
@@ -61,7 +63,7 @@ public class FirstPersonCharacter : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-        }
+        }*/
 	}
 	
 	
@@ -106,9 +108,8 @@ public class FirstPersonCharacter : MonoBehaviour
 		
 		// Create a ray that points down from the centre of the character.
 		Ray ray = new Ray(transform.position, -transform.up);
-		
-		// Raycast slightly further than the capsule (as determined by jumpRayLength)
-		RaycastHit[] hits = Physics.RaycastAll(ray, capsule.height * jumpRayLength );
+        // Raycast slightly further than the capsule (as determined by jumpRayLength)
+        RaycastHit[] hits = Physics.RaycastAll(ray, capsule.height * jumpRayLength,terraignMask);
 		System.Array.Sort (hits, rayHitComparer);
 		
 		

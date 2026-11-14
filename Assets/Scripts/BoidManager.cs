@@ -15,27 +15,61 @@ public class BoidManager : MonoBehaviour
     public BoidSettings settings;
     public ComputeShader compute;
     private List<Boid> boids;
-    //private List<List<Boid>> boidMatrix;
     [SerializeField]
     private GameObject corpseObject;
     [SerializeField]
     private Transform player;
 
     [SerializeField]
-    private Canvas canvas;
-    private TextMeshProUGUI textUI;
+    private ShopMechanic storeManager;
+
+    private Queue<Boid> deadBoids = new Queue<Boid>();
+
+
+    private List<(Transform target,float radius,float weight)> boidTargets = new List<(Transform,float,float)>();
+
+    public Transform Player
+    {
+        get
+        {
+            return player;
+        }
+    }
+
+    public List<(Transform target, float radius, float weight)> BoidTargets
+    {
+        get
+        {
+            return boidTargets;
+        }
+    }
+    public float BoidPopulation
+    {
+        get
+        {
+            return (float)(initialBoidCount-deadBoids.Count)/initialBoidCount;
+        }
+    }
+
+
+    [SerializeField]
+    private TextMeshProUGUI boidCountText;
+    [SerializeField]
+    private TextMeshProUGUI winText;
+    [SerializeField]
+    private TextMeshProUGUI marketValueText;
     int deadBoidCount = 0;
     int initialBoidCount = 0;
 
     //Vector3 bottomCorner = Vector3.zero;
     //Vector3 topCorner = Vector3.zero;
-    [SerializeField]
-    private Vector3 boidActiveZoneSize = Vector3.one;
 
     private Vector3 regionOffset;
     private Vector3Int gridSizes;
     private int[] localOffsetArray;
     private int numRegions;
+
+
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -45,104 +79,12 @@ public class BoidManager : MonoBehaviour
         boids = ((Boid[])FindObjectsByType(typeof(Boid),FindObjectsSortMode.None)).ToList<Boid>();
         foreach(Boid boido in boids)
         {
-            boido.Initialize(settings,player);
+            boido.Initialize(settings,this);
         }
-        if (!canvas)
-        {
-            canvas = GetComponentInChildren<Canvas>();
-        }
-        textUI = canvas.GetComponentInChildren<TextMeshProUGUI>();
         initialBoidCount = boids.Count;
 
-        AssignBoidsToGrid(boids);
-        GenerateLocalOffsetArray();
 
     }
-    private void GenerateBoidGrid()
-    {
-        float regionSize = 2*settings.perceptionRadius;
-        Vector3 size = boidActiveZoneSize;
-        float numRegionsX = Mathf.Ceil(size.x/ regionSize)+2;
-        float numRegionsY = Mathf.Ceil(size.y/ regionSize)+2;
-        float numRegionsZ = Mathf.Ceil(size.z/ regionSize)+2;
-        gridSizes = new Vector3Int((int) numRegionsX, (int) numRegionsY, (int) numRegionsZ);
-        //i = y * (Z_MAX * X_MAX) + Z * (X_MAX) + x
-        regionOffset = new Vector3(numRegionsX, numRegionsY, numRegionsZ) * -regionSize / 2 + transform.position ;
-        numRegions = gridSizes.x * gridSizes.z * gridSizes.y;
-
-    }
-    private void AssignBoidsToGrid(List<Boid> boids)
-    {
-        for (int i = 0; i < boids.Count; i++)
-        {
-            Vector3 boidPos = boids[i].transform.position;
-            Vector3 regionPos = (boidPos - regionOffset) / (2 * settings.perceptionRadius);
-
-            int value = Mathf.FloorToInt(regionPos.y) * (gridSizes.z * gridSizes.x) + Mathf.FloorToInt(regionPos.z) * (gridSizes.x) + Mathf.FloorToInt(regionPos.x);
-            //boidMatrix[value].Add(boids[i]);
-            boids[i].localGridIndex = value;
-            Vector3 size = new Vector3(gridSizes.x, gridSizes.y, gridSizes.z);
-            Debug.Log(boidPos + " vs " + regionOffset+"and"+ size * (2 * settings.perceptionRadius) + " to "+(regionOffset+size * (2 * settings.perceptionRadius)));
-            //Debug.Log(gridSizes.x + ", " + gridSizes.y + ", " + gridSizes.z + " vs " + Mathf.FloorToInt(regionPos.x) + ", " + Mathf.FloorToInt(regionPos.y) + ", " + Mathf.FloorToInt(regionPos.z));
-        }
-    }
-    private void UpdateLocalGrid(Boid boid)
-    {
-        Vector3 boidPos = boid.transform.position;
-        Vector3 regionPos = (boidPos - regionOffset) / (2 * settings.perceptionRadius);
-        int value = Mathf.FloorToInt(regionPos.y) * (gridSizes.z * gridSizes.x) + Mathf.FloorToInt(regionPos.z) * (gridSizes.x) + Mathf.FloorToInt(regionPos.x);
-        
-        //boidMatrix[oldValue].Remove(boid);
-        //boidMatrix[value].Add(boid);
-        boid.localGridIndex = value;
-    }
-
-    private void GenerateLocalOffsetArray()
-    {
-        int Z_MAX = gridSizes.z;
-        int X_MAX = gridSizes.x;
-
-        int[] array = new int[27];
-        for(int i = 0; i < 27; i++)
-        {
-            array[i] = 0;
-        }
-        for(int i = 0; i < 9; i++)
-        {
-            //i = y * (Z_MAX * X_MAX) + Z * (X_MAX) + x
-            array[i] -= (Z_MAX * X_MAX);
-        }
-        for (int i = 18; i < 27; i++)
-        {
-            //i = y * (Z_MAX * X_MAX) + Z * (X_MAX) + x
-            array[i] += (Z_MAX * X_MAX);
-        }
-        for(int i = 0; i < 27; i += 9)
-        {
-            array[i] -= X_MAX;
-            array[i + 1] -= X_MAX;
-            array[i + 2] -= X_MAX;
-        }
-        for (int i = 6; i < 27; i += 9)
-        {
-            array[i] += X_MAX;
-            array[i + 1] += X_MAX;
-            array[i + 2] += X_MAX;
-        }
-
-
-
-        for (int i = 0; i < 27; i += 3)
-        {
-            array[i] -= 1;
-        }
-        for(int i = 2;i < 27; i += 3)
-        {
-            array[i] += 1;
-        }
-        localOffsetArray = array;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -167,6 +109,16 @@ public class BoidManager : MonoBehaviour
         {
             return;
         }
+        int numTargets = boidTargets.Count;
+
+        TargetData[] targetData = new TargetData[numTargets];
+        for(int i = 0; i < targetData.Length; i++)
+        {
+            targetData[i].position = boidTargets[i].target.position;
+            targetData[i].radius = boidTargets[i].radius;
+            targetData[i].weight = boidTargets[i].weight;
+        }
+
         BoidData[] boidData = new BoidData[numBoids];
 
         int[] gridCounts = new int[numRegions];
@@ -175,46 +127,23 @@ public class BoidManager : MonoBehaviour
             gridCounts[boids[i].localGridIndex] += 1;
 
         }
-        int[] matrixCounts = new int[gridCounts.Length];
-        int count = 0;
-
-        for (int i = 0; i < matrixCounts.Length; i++)
-        {
-
-            matrixCounts[i] = count;
-            if (i < matrixCounts.Length - 1)
-            {
-                count += gridCounts[i];
-
-            }
-            else
-            {
-                count = numBoids;
-            }
-
-
-        }
-        int[] matrixCountsClone = new int[gridCounts.Length];
-        matrixCounts.CopyTo(matrixCountsClone,0);
-        int[] map = new int[boidData.Length];
-        for (int i=0;i<boidData.Length; i++)
-        {
-            int index = matrixCountsClone[boids[i].localGridIndex];
-
-            boidData[index].position = boids[i].position;
-            boidData[index].direction = boids[i].forward;
-            boidData[index].fearLevel = boids[i].fearLevel;
-            boidData[index].isDead = boids[i].isAlreadyDead?1:0;
-            boidData[index].localGridIndex = boids[i].localGridIndex;
-            map[index] = i;
-            matrixCountsClone[boids[i].localGridIndex]++;
-            
-        }
-
+        ComputeBuffer targetBuffer;
         //Create Compute buffer using data
-        ComputeBuffer boidBuffer = new ComputeBuffer(numBoids, BoidData.Size);
-        ComputeBuffer indexBuffer= new ComputeBuffer(matrixCounts.Length, sizeof(int));
-        ComputeBuffer localOffsetBuffer = new ComputeBuffer(localOffsetArray.Length, sizeof(int));
+        if (numTargets > 0)
+        {
+            targetBuffer = new ComputeBuffer(numTargets, TargetData.Size);
+            targetBuffer.SetData(targetData);
+
+        }
+        else
+        {
+            targetBuffer = new ComputeBuffer(1, TargetData.Size);
+
+        }
+        //set computer buffer and other inputs
+        //Create Compute buffer using data
+        compute.SetBuffer(0, "targets", targetBuffer);
+        compute.SetInt("numTargets", numTargets);
         //set computer buffer and other inputs
         boidBuffer.SetData(boidData);
         indexBuffer.SetData(matrixCounts);
@@ -243,67 +172,99 @@ public class BoidManager : MonoBehaviour
         int length = boidData.Length;
 
         for(int i = 0; i < length; i++)
-        {
-            boids[map[i]].sumFlockDir = boidData[i].flockHeading;
-            boids[map[i]].sumSeperationDir = boidData[i].avoidanceHeading;
-            boids[map[i]].sumFlockCenter = boidData[i].flockCentre;
-            boids[map[i]].flockSize = boidData[i].numFlockmates;
-            boids[map[i]].fearLevelChange =boidData[i].fearLevelChange;
-            boids[map[i]].sumFlockFearLevel = boidData[i].flockFearLevel;
-            if (boids[map[i]].isAlreadyDead)
+            boids[i].sumFlockDir = boidData[i].flockHeading;
+            boids[i].sumSeperationDir = boidData[i].avoidanceHeading;
+            boids[i].sumFlockCenter = boidData[i].flockCentre;
+            boids[i].flockSize = boidData[i].numFlockmates;
+            boids[i].fearLevelChange =boidData[i].fearLevelChange;
+            boids[i].sumFlockFearLevel = boidData[i].flockFearLevel;
+
+            boids[i].sumTargetDir = boidData[i].targetDir;
+            //boids[i].targetsCount = boidData[i].targetCount;
+
+            if (!boids[i].isAlreadyDead)
+            {
+                boids[i].UpdateBoid();
+            }
+            else if(boids[i].isActiveAndEnabled)
+            if (boids[i].isAlreadyDead)
             {
                 continue;
-                GameObject corpse = GameObject.Instantiate(corpseObject);
-                corpse.transform.position = boids[map[i]].transform.position;
-                corpse.transform.rotation = boids[map[i]].transform.rotation;
-                //RemoveFromLocalGrid(boidArray[i]);
-                boids.Remove(boids[map[i]]);
-                Destroy(boids[map[i]].gameObject);
-                deadBoidCount++;
-                i--;
-                length--;
-            }
-            else
-            {
-                Debug.Log(i + " ->" + map[i]);
-                boids[map[i]].UpdateBoid();
-                UpdateLocalGrid(boids[map[i]]);
+                corpse.transform.position = boids[i].transform.position;
+                corpse.transform.rotation = boids[i].transform.rotation;
+                deadBoids.Enqueue(boids[i]);
+                boids[i].gameObject.SetActive(false);
+               
+                storeManager.AddCash(Mathf.FloorToInt(settings.boidValue.Evaluate(Mathf.InverseLerp(0, initialBoidCount, deadBoids.Count))));
+                //Destroy(boids[i].gameObject);
+                //boids.RemoveAt(i);
+
+                UpdateLocalGrid(boids[i]);
 
             }
 }
 
         //release the buffer.
+        targetBuffer.Release();
         boidBuffer.Release();
-        indexBuffer.Release();
-        localOffsetBuffer.Release();
         UpdateUI();
     }
     private void UpdateUI()
     {
         if (deadBoidCount >= initialBoidCount)
         {
-            textUI.rectTransform.position = canvas.pixelRect.center;
-            textUI.color = Color.green;
-            textUI.text = "YOU WIN!";
+            winText.gameObject.SetActive(true);
 
         }
         else
         {
+            boidCountText.text = (initialBoidCount - deadBoids.Count).ToString();
 
-            textUI.text = "Boids Slain: " + deadBoidCount + "/" + initialBoidCount;
         }
+        marketValueText.text = "Market Value: $" + Mathf.FloorToInt(settings.boidValue.Evaluate(Mathf.InverseLerp(0, initialBoidCount, deadBoids.Count)));
     }
 
-    void OnDrawGizmosSelected()
+    public void AddTarget(Transform target, float radius, float weight)
     {
-        Vector3 pos = transform.position;
-        Vector3 size = boidActiveZoneSize;
-        Gizmos.color = new Color(255, 165, 0);
-        Gizmos.DrawWireCube(pos, size);
+        boidTargets.Add((target, radius, weight));
+    }
+    public void RemoveTarget(Transform target)
+    {
+        boidTargets.RemoveAll((hit) => hit.target == target);
+    }
+    public void RemoveTarget(Transform target,float radius,float weight)
+    {
+        boidTargets.Remove((target,radius,weight));
+    }
+    public void RespawnBoid(Vector3 position, Vector3 forward)
+    {
+        if (deadBoids.Count > 0)
+        {
+            Boid reincarnatedBoid = deadBoids.Dequeue();
+
+            reincarnatedBoid.Initialize(position, forward, settings, this, 0f);
+        }
+        Debug.Log("BREED");
+    }
+
+
+    public struct TargetData
+    {
+        public Vector3 position;
+        public float radius;
+        public float weight;
+
+        public static int Size
+        {
+            get
+            {
+                return sizeof(float) * 3 * 1 + sizeof(float) * 2;
+            }
+        }
 
 
     }
-    public struct BoidData
+        public struct BoidData
     {
         public Vector3 position;
         public Vector3 direction;
@@ -311,6 +272,9 @@ public class BoidManager : MonoBehaviour
         public Vector3 flockHeading;
         public Vector3 flockCentre;
         public Vector3 avoidanceHeading;
+
+        public Vector3 targetDir;
+        //public int targetCount;
 
         public float fearLevel;
         public float fearLevelChange;
@@ -326,8 +290,8 @@ public class BoidManager : MonoBehaviour
         public static int Size
         {
             get
-            {
-                return sizeof(float) * 3 * 5+sizeof(float)*3 + sizeof(int)*3;
+                return sizeof(float) * 3 * 6 + sizeof(float)*3 + sizeof(int)*2;
+                return sizeof(float) * 3 * 5+sizeof(float)*3 + sizeof(int)*2;
             }
         }
     }

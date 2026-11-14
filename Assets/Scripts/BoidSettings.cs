@@ -9,6 +9,7 @@ public class BoidSettings : ScriptableObject
     public float perceptionRadius = 3;
     public float avoidanceRadius = 1;
     public float maxTurnForce = 3;
+    public float specialMaxTurnForce = 10;
 
 
     public float alignWeight = 1;
@@ -24,6 +25,23 @@ public class BoidSettings : ScriptableObject
     [Header("Boid Noise")]
     [Tooltip("Determines intensity of noise")]
     public float noiseMagnitude = 0.1f;
+
+    [Header("Boid Breeding Mechanic")]
+    public bool enableBreeding=false;
+    public float maxAge = 10;
+    public AnimationCurve ageScaling;
+    //public float minAgeScale = 0.1f;
+    //public float maxAgeSize = 1f;
+
+
+    public int maxBreedingPopulation = 20;
+    public int minBreedingPopulation = 1;
+
+    public AnimationCurve breedingRate;
+
+    public AnimationCurve populationCurbing;
+
+    public float breedingThreshold = 10;
 
 
     [Header("Boid Loneliness")]
@@ -49,7 +67,8 @@ public class BoidSettings : ScriptableObject
     [Tooltip("Determines how strongly the boids avoid the player at max fear")]
     public float maxFearWeight = -1;
 
-
+    [Header("Boid Economy")]
+    public AnimationCurve boidValue;
 
     //[Tooltip("Determines how far the boids consider being at the \"center\" of a flock extends, with smaller flocks having a smaller center area")]
     //public float centerSizeCoefficient = 0.5f;
@@ -65,6 +84,7 @@ public class BoidSettings : ScriptableObject
     [Tooltip("Determines color the boid become if it has seen the death of their comrads")]
     public Color fearColor = Color.red;
 
+    
 
 
 }

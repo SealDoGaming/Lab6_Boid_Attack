@@ -5,15 +5,21 @@
 /// This script allows the player to switch weapons in two ways, by pressing the numbers corresponding to each weapon, or by scrolling with the mouse.
 /// </summary>
 
-using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
 
 public class WeaponSystem : MonoBehaviour
 {
 	public GameObject[] weapons;				// The array that holds all the weapons that the player has
 	public int startingWeaponIndex = 0;			// The weapon index that the player will start with
-	private int weaponIndex;					// The current index of the active weapon
-
+	private int weaponIndex;                    // The current index of the active weapon
+	private bool locked = false;
+	[SerializeField]
+	private TextMeshProUGUI ammoText;
 
 	// Use this for initialization
 	void Start()
@@ -27,6 +33,10 @@ public class WeaponSystem : MonoBehaviour
 	void Update()
 	{
 		// Allow the user to instantly switch to any weapon
+		if (locked)
+		{
+			return;
+		}
 		if (Input.GetButtonDown("Weapon 1"))
 			SetActiveWeapon(0);
 		if (Input.GetButtonDown("Weapon 2"))
@@ -55,9 +65,40 @@ public class WeaponSystem : MonoBehaviour
 
 	void OnGUI()
 	{
+        if (weapons[weaponIndex].GetComponent<Weapon>())
+        {
+			Weapon weapon = weapons[weaponIndex].GetComponent<Weapon>();
 
+            if (weapon.type == WeaponType.Beam)
+			{
+				ammoText.text = "Heat: " + weapon.GetHeat();
+			}
+			else
+			{
+				string text = "Ammo: ";
+				int ammo = weapon.GetCurrentAmmo();
+				if (ammo == -1)
+				{
+					ammoText.text = text + "Yes";
+					return;
+				}
+				text += ammo;
+				int reserve = weapon.GetCurrentReserve();
+				if (reserve == -1)
+				{
+					ammoText.text = text;
+					return;
+				}
+				ammoText.text = text + " / " + reserve;
 
-	}
+            }
+
+		}
+		else
+		{
+			ammoText.text = "Ammo: Its an axe, Stupid";
+		}
+    }
 
 	public void SetActiveWeapon(int index)
 	{
@@ -85,7 +126,7 @@ public class WeaponSystem : MonoBehaviour
 		for (int i = 0; i < weapons.Length; i++)
 		{
 			weapons[i].SetActive(false);
-		}
+        }
 
 		// Activate the one weapon that we want
 		weapons[index].SetActive(true);
@@ -106,4 +147,54 @@ public class WeaponSystem : MonoBehaviour
 			weaponIndex = weapons.Length - 1;
 		SetActiveWeapon(weaponIndex);
 	}
+
+	public void LockWeapons()
+    {
+		if (!locked) {
+            // Start be deactivating all weapons
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                weapons[i].SetActive(false);
+            }
+        }
+		locked = true;
+    }
+
+	public void UnlockWeapons()
+	{
+		if (locked)
+		{
+			SetActiveWeapon(weaponIndex);
+        }
+		locked = false;
+    }
+	public void AddWeapon(GameObject weapon)
+	{
+		List<GameObject> tempList = weapons.ToList();
+		tempList.Add(weapon);
+		weapons = tempList.ToArray();
+		weaponIndex = weapons.Length - 1;
+	}
+	public void RemoveWeapon(GameObject weapon)
+    {
+        List<GameObject> tempList = weapons.ToList();
+		if (tempList.Contains(weapon))
+		{
+			tempList.Remove(weapon);
+            weapons = tempList.ToArray();
+			if (weaponIndex < weapons.Length)
+            {
+				SetActiveWeapon(weaponIndex);
+
+
+
+			}
+			else
+			{
+				SetActiveWeapon(0);
+			}
+        }
+
+
+    }
 }
